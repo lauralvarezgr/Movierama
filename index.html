@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movierama</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+  <main class="panel">
+    <h1>🍿 Cartelera: lo más popular</h1>
+    <form id="form-buscar" class="buscador">
+      <input id="buscar" type="search" placeholder="Busca una película (vacío = populares)">
+      <button type="submit">Buscar</button>
+    </form>
+    <p id="estado" class="estado"></p>
+    <section id="rejilla" class="rejilla"></section>
+    <button id="mas" class="btn-mas">Cargar más</button>
+    <p class="credito">Este producto usa la API de TMDB, pero no está respaldado ni certificado por TMDB.</p>
+  </main>
+
+  <section id="rejilla" class="rejilla"></section>
+  <section id="detalle" class="detalle" hidden></section>
+
+  <script type="module" src="js/main.js" defer></script>
+
+
+</body>
+
+</html>

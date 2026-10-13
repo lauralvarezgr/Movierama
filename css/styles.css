@@ -1,0 +1,294 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f4f8;
+    color: #1a1a1a;
+    padding: 24px;
+}
+
+.panel {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: white;
+    padding: 24px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.estado {
+    background: #1F3864;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.estado.error {
+    background: #C0392B;
+}
+
+.rejilla {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.tarjeta {
+    width: 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tarjeta img,
+.sin-poster {
+    width: 180px;
+    height: 270px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: #D5E8F4;
+}
+
+.sin-poster {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+}
+
+.tarjeta h3 {
+    font-size: 1rem;
+}
+
+.tarjeta p {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.btn-mas {
+    align-self: center;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    background: #2E75B6;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.btn-mas:disabled {
+    background: #9DB4CC;
+    cursor: wait;
+}
+
+.credito {
+    font-size: 0.8rem;
+    color: #777;
+    text-align: center;
+}
+
+.rejilla {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.card {
+    width: 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.card img {
+    width: 180px;
+    height: 270px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.card h3 {
+    font-size: 1rem;
+}
+
+.card p {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.card {
+    position: relative;
+    cursor: pointer;
+}
+
+.poster-wrap {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 2 / 3;
+}
+
+.poster-wrap img,
+.sin-poster {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.sin-poster {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #333;
+    color: #aaa;
+}
+
+.card-titulo {
+    position: absolute;
+    inset: 0;                       /* cubre todo el póster */
+    margin: 0;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.6); /* fondo semitransparente */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;           /* no bloquea clics sobre la tarjeta */
+}
+
+.card:hover .card-titulo,
+.card:focus-within .card-titulo {
+    opacity: 1;
+}
+
+.buscador {
+    display: flex;
+    gap: 8px;
+}
+
+.buscador input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.buscador button,
+.btn-favs {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    background: #2E75B6;
+    color: white;
+    cursor: pointer;
+}
+
+.barra {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.barra .estado {
+    flex: 1;
+}
+
+.modal-detalle {
+    border: none;
+    border-radius: 12px;
+    padding: 0;
+    width: min(900px, 92vw);
+    max-height: 90vh;
+    overflow: auto; 
+    align-self: center;
+    justify-self: center;
+}
+
+.modal-detalle::backdrop {
+    background: rgba(0, 0, 0, 0.75);   /* oscurece la rejilla y todo lo demás */
+}
+
+.modal-contenido {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.modal-poster {
+    flex: 0 0 220px;
+}
+
+.modal-poster img {
+    width: 100%;
+    border-radius: 8px;
+    display: block;
+}
+
+.modal-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.modal-detalle .cerrar {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+}
+
+/* Evita que se desplace la rejilla por detrás */
+body:has(dialog[open]) {
+    overflow: hidden;
+}
+
+@media (max-width: 600px) {
+    .modal-contenido {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+.btn-fav {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(31, 56, 100, 0.85);
+    color: #FFD166;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.historial {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.chip {
+    padding: 4px 12px;
+    border: 1px solid #2E75B6;
+    border-radius: 16px;
+    background: white;
+    color: #2E75B6;
+    cursor: pointer;
+}
+
+mark {
+    background: #FFD166;
+    padding: 0 2px;
+    border-radius: 3px;
+}
