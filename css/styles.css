@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&family=Orbitron:wght@500;600;700;800&display=swap');
 
 /* ===================== BASE ===================== */
 * {
@@ -9,7 +9,7 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: Exo 2, sans-serif;
     color: #e8ecf5;
     padding: 24px;
     overflow-x: clip;   /* evita barra horizontal cuando el título sale volando */
@@ -30,24 +30,46 @@ body::after {
     pointer-events: none;
 }
 
-body::before {
-    background-image:
-        radial-gradient(1px 1px at 20px 30px,   #fff, transparent),
-        radial-gradient(1px 1px at 90px 120px,  #cfe3ff, transparent),
-        radial-gradient(1.5px 1.5px at 160px 60px, #fff, transparent),
-        radial-gradient(1px 1px at 230px 180px, #ffe9b8, transparent),
-        radial-gradient(1px 1px at 310px 90px,  #fff, transparent);
-    background-size: 340px 220px;
-    opacity: 0.8;
+/* ===================== FONDO ESPACIAL (estrellas) ===================== */
+body::before,
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
 }
 
+/* Capa 1: muchas estrellas pequeñas y medianas */
+body::before {
+    background-image:
+        radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+        radial-gradient(3px 3px at 90px 120px, #cfe3ff, transparent),
+        radial-gradient(2px 2px at 160px 60px, #fff, transparent),
+        radial-gradient(3px 3px at 230px 180px, #ffe9b8, transparent),
+        radial-gradient(2px 2px at 310px 90px, #fff, transparent),
+        radial-gradient(2px 2px at 270px 40px, #bcd7ff, transparent);
+
+    background-size: 340px 220px;
+    opacity: 0.9;
+}
+
+/* Capa 2: estrellas grandes y brillantes que titilan */
 body::after {
     background-image:
-        radial-gradient(2px 2px at 60px 80px,       #fff, transparent),
-        radial-gradient(1.5px 1.5px at 200px 200px, #bcd7ff, transparent),
-        radial-gradient(2px 2px at 380px 40px,      #fff, transparent);
+        radial-gradient(5px 5px at 60px 80px, #fff, transparent),
+        radial-gradient(4px 4px at 200px 200px, #bcd7ff, transparent),
+        radial-gradient(6px 6px at 380px 40px, #fff, transparent),
+        radial-gradient(4px 4px at 300px 150px, #ffe9b8, transparent),
+        radial-gradient(5px 5px at 120px 260px, #d8e8ff, transparent);
+
     background-size: 460px 300px;
     animation: titilar 5s ease-in-out infinite alternate;
+}
+
+@keyframes titilar {
+    from { opacity: 0.4; }
+    to   { opacity: 1; }
 }
 
 @keyframes titilar {
@@ -131,12 +153,14 @@ body::after {
 }
 
 .buscador input {
+    position: relative;
     flex: 1;
     padding: 10px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 6px;
     background: rgba(255, 255, 255, 0.06);
     color: #fff;
+    align-self: center;
 }
 
 .buscador input::placeholder {
@@ -164,12 +188,12 @@ body::after {
 }
 
 .estado {
-    background: rgba(31, 56, 100, 0.55);
-    border: 1px solid rgba(255, 255, 255, 0.12);
     color: white;
     padding: 10px 16px;
-    border-radius: 8px;
-    font-weight: bold;
+    font-weight: lighter;
+    font-family: 'Exo 2', sans-serif;
+    font-size: smaller;
+
 }
 
 .estado.error {
@@ -182,6 +206,10 @@ body::after {
     flex-wrap: wrap;
     gap: 16px;
     background: transparent;
+    position: relative;
+    align-self: center;
+    justify-content: center;
+    padding: 3%;
 }
 
 .card {
@@ -375,6 +403,30 @@ mark {
     padding: 0 2px;
     border-radius: 3px;
 }
+
+/* Efecto hover en las tarjetas */
+.card {
+    transition: transform 0.3s ease;
+    transform-origin: center center;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    z-index: 2;
+}
+
+#estado {
+    display: none;
+}
+
+.btn-fav {
+    display: none;
+}
+
+.card p {
+    display: none;
+}
+
 
 /* ===================== RESPONSIVE Y ACCESIBILIDAD ===================== */
 @media (max-width: 600px) {
