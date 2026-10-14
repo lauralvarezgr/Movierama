@@ -9,18 +9,22 @@
 
 <body>
   <main class="panel">
-    <h1>🍿 Cartelera: lo más popular</h1>
+    <header class="hero">
+      <h1 id="titulo" class="titulo-meteoro">
+        <span class="titulo-flota">
+          <span class="titulo-giro">Movierama</span>
+        </span>
+      </h1>
+    </header>
     <form id="form-buscar" class="buscador">
-      <input id="buscar" type="search" placeholder="Busca una película (vacío = populares)">
+      <input id="buscar" type="search" placeholder="¿Qué película te apetece ver hoy?">
       <button type="submit">Buscar</button>
     </form>
     <p id="estado" class="estado"></p>
     <section id="rejilla" class="rejilla"></section>
     <button id="mas" class="btn-mas">Cargar más</button>
-    <p class="credito">Este producto usa la API de TMDB, pero no está respaldado ni certificado por TMDB.</p>
   </main>
 
-  <section id="rejilla" class="rejilla"></section>
   <section id="detalle" class="detalle" hidden></section>
 
   <script type="module" src="js/main.js" defer></script>

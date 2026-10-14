@@ -4,7 +4,6 @@ let pelis = [];
 let pagina = 0;
 let totalPaginas = 1;
 let busqueda = "";
-let favoritos = false; 
 
 // DOM
 const rejilla = document.querySelector("#rejilla");
@@ -12,7 +11,7 @@ const estado = document.querySelector("#estado");
 const btnMas = document.querySelector("#mas");
 const form = document.querySelector("#form-buscar");
 const inputBuscar = document.querySelector("#buscar");
-const panel = document.querySelector("#detalle");
+const titulo = document.querySelector("#titulo");
 
 // MODAL
 const modal = document.createElement("dialog");
@@ -34,7 +33,7 @@ function esFavorita(id) {
     return false;
 }
 
-// VISTAƒ
+// VISTA
 function pintarRejilla() {
     rejilla.innerHTML = "";
     if (pelis.length === 0) {
@@ -55,7 +54,6 @@ function pintarDetalle({ peli, director, reparto }) {
     const contenido = document.createElement("div");
     contenido.className = "modal-contenido";
 
-    // Póster de la película pulsada, dentro del modal
     const posterBox = document.createElement("div");
     posterBox.className = "modal-poster";
     if (posterUrl) {
@@ -88,8 +86,7 @@ function pintarDetalle({ peli, director, reparto }) {
     modal.append(cerrarBtn, contenido);
 }
 
-
-// CARGA DE DATOS 
+// CARGA DE DATOS
 async function cargarPagina() {
     btnMas.disabled = true;
     estado.textContent = "Cargando";
@@ -106,10 +103,8 @@ async function cargarPagina() {
 
         pintarRejilla();
         const notaMedia = media(...pelis.map(p => p.nota)).toFixed(1);
-        estado.textContent = `${pelis.length} peliculas * media ${notaMedia}, * pagina ${pagina} de ${totalPaginas}`;
-        const titulo = busqueda ? `"${busqueda}"` : "populares";
-        estado.textContent = `${pelis.length} peliculas * ${titulo} * media ${notaMedia} * pagina ${pagina} de ${totalPaginas}`;
-
+        const etiqueta = busqueda ? `"${busqueda}"` : "populares";
+        estado.textContent = `${pelis.length} peliculas * ${etiqueta} * media ${notaMedia} * pagina ${pagina} de ${totalPaginas}`;
     } catch (error) {
         mostrarError(error.message);
     } finally {
@@ -117,35 +112,6 @@ async function cargarPagina() {
         btnMas.hidden = pagina >= totalPaginas;
     }
 }
-
-// EVENTOS 
-btnMas.addEventListener("click", cargarPagina);
-form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    empezarDeCero(inputBuscar.value.trim());
-}
-);
-
-async function abrir(card) {
-    const datos = await obtenerDetalles(card.dataset.id); // tu función real
-    pintarDetalle(datos);
-    modal.showModal();
-}
-
-rejilla.addEventListener("click", (e) => {
-    if (e.target.closest(".btn-fav")) return;   // el favorito va aparte
-    const card = e.target.closest(".card");
-    if (card) abrir(card);
-});
-
-modal.addEventListener("click", (e) => {
-    // X, o clic en la zona oscura (fuera del contenido)
-    if (e.target.closest(".cerrar") || e.target === modal) modal.close();
-});
-
-// ARRANQUE
-panel.hidden = false;
-cargarPagina();
 
 function empezarDeCero(texto) {
     busqueda = texto;
@@ -155,13 +121,65 @@ function empezarDeCero(texto) {
     cargarPagina();
 }
 
-function alternarFavoritos(id){
-    if(esFavorita(id)){
-        favoritos = favoritos.filter(f => f.id !== id);
-    } else{
-        const peli = pelis.find(p => p.id === id);
-        if (peli) favoritos = [...favoritos, peli]; 
+// ABRIR DETALLE (con registros para depurar)
+async function abrir(card) {
+    console.log("1. abrir() llamado, id:", card.dataset.id);
+    try {
+        const datos = await obtenerDetalles(card.dataset.id);
+        console.log("2. datos recibidos:", datos);
+        pintarDetalle(datos);
+        console.log("3. modal pintado, hijos:", modal.children.length);
+        modal.showModal();
+        console.log("4. showModal ejecutado, abierto:", modal.open);
+    } catch (error) {
+        console.error("FALLO en abrir():", error);
+        mostrarError(error.message);
     }
-    guardarFavoritos(favoritos);
-    pintarRejilla();
 }
+
+// EVENTOS
+btnMas.addEventListener("click", cargarPagina);
+
+form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    empezarDeCero(inputBuscar.value.trim());
+});
+
+rejilla.addEventListener("click", (e) => {
+    console.log("0. clic en rejilla sobre:", e.target);
+    if (e.target.closest(".btn-fav")) return;
+    const card = e.target.closest(".card");
+    if (card) abrir(card);
+});
+
+modal.addEventListener("click", (e) => {
+    // X, o clic en la zona oscura (fuera del contenido)
+    if (e.target.closest(".cerrar") || e.target === modal) modal.close();
+});
+
+// TÍTULO: efecto meteorito al hacer scroll
+const RECORRIDO = 700;
+let esperandoFrame = false;
+
+function actualizarMeteoro() {
+    if (!titulo) return;
+    const p = Math.min(window.scrollY / RECORRIDO, 1);
+    const e = p * p;
+
+    titulo.style.setProperty("--s", 1 + e * 6);            // se acerca (crece)
+    titulo.style.setProperty("--x", `${e * 60}vw`);        // sale hacia la derecha
+    titulo.style.setProperty("--y", `${e * -15}vh`);       // y un poco hacia arriba
+    titulo.style.setProperty("--r", `${p * 300}deg`);      // gira mientras sale
+    titulo.style.setProperty("--o", Math.max(0, 1 - Math.max(0, p - 0.5) * 2));
+    esperandoFrame = false;
+}
+
+window.addEventListener("scroll", () => {
+    if (esperandoFrame) return;
+    esperandoFrame = true;
+    requestAnimationFrame(actualizarMeteoro);
+}, { passive: true });
+
+// ARRANQUE
+actualizarMeteoro();
+cargarPagina();
