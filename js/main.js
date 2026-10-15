@@ -1,9 +1,10 @@
-import { buscarPeliculas, obtenerDetalles, obtenerPopulares } from "./api.js";
+import { buscarPeliculas, obtenerDetalles, obtenerPopulares, obtenerPorGenero } from "./api.js";
 
 let pelis = [];
 let pagina = 0;
 let totalPaginas = 1;
 let busqueda = "";
+let generoSeleccionado = null;
 
 // DOM
 const rejilla = document.querySelector("#rejilla");
@@ -34,14 +35,50 @@ function esFavorita(id) {
 }
 
 // VISTA
+
+
+function actualizarCortina() {
+    const hayPosters = rejilla.querySelector(".card img") !== null;
+
+    document.body.classList.toggle("generos-abiertos", hayPosters);
+
+    actualizarOrbitaGeneros();
+}
+
 function pintarRejilla() {
     rejilla.innerHTML = "";
+
     if (pelis.length === 0) {
         rejilla.textContent = "Sin resultados";
+        actualizarCortina();
         return;
     }
-    pelis.forEach(peli => rejilla.append(peli.toCard(esFavorita(peli.id))));
+
+    pelis.forEach(peli => {
+        rejilla.append(peli.toCard(esFavorita(peli.id)));
+    });
+
+    actualizarCortina();
 }
+
+
+function actualizarOrbitaGeneros() {
+    const capa = document.querySelector("#generos-flotantes");
+    if (!capa) return;
+
+    const palabras = capa.querySelectorAll(".genero-flotante");
+
+    palabras.forEach(palabra => {
+        palabra.classList.remove("genero-debajo");
+        palabra.style.removeProperty("--orbita-x");
+        palabra.style.removeProperty("left");
+        palabra.style.removeProperty("top");
+        palabra.style.removeProperty("font-size");
+    });
+}
+
+
+
 
 function pintarDetalle({ peli, director, reparto }) {
     const { titulo, anio, nota, duracion, generos, descripcion, posterUrl } = peli;
@@ -93,9 +130,12 @@ async function cargarPagina() {
     estado.classList.remove("error");
     try {
         const siguiente = pagina + 1;
-        const { pelis: nuevas, totalPaginas: total } = busqueda
-            ? await buscarPeliculas(busqueda, siguiente)
-            : await obtenerPopulares(siguiente);
+        
+        const { pelis: nuevas, totalPaginas: total } = generoSeleccionado !== null
+        ? await obtenerPorGenero(generoSeleccionado.id, siguiente)
+        : busqueda
+        ? await buscarPeliculas(busqueda, siguiente)
+        : await obtenerPopulares(siguiente);
 
         pelis = [...pelis, ...nuevas];
         pagina = siguiente;
@@ -103,8 +143,10 @@ async function cargarPagina() {
 
         pintarRejilla();
         const notaMedia = media(...pelis.map(p => p.nota)).toFixed(1);
-        const etiqueta = busqueda ? `"${busqueda}"` : "populares";
+        const etiqueta = generoSeleccionado
+        ? generoSeleccionado.nombre : busqueda ? `"${busqueda}"` : "populares";
         estado.textContent = `${pelis.length} peliculas * ${etiqueta} * media ${notaMedia} * pagina ${pagina} de ${totalPaginas}`;
+
     } catch (error) {
         mostrarError(error.message);
     } finally {
@@ -115,6 +157,7 @@ async function cargarPagina() {
 
 function empezarDeCero(texto) {
     busqueda = texto;
+    generoSeleccionado = null;
     pelis = [];
     pagina = 0;
     totalPaginas = 1;
@@ -183,3 +226,82 @@ window.addEventListener("scroll", () => {
 // ARRANQUE
 actualizarMeteoro();
 cargarPagina();
+
+
+
+/* ===================== GÉNEROS FLOTANTES ===================== */
+
+const capaGeneros = document.querySelector("#generos-flotantes");
+
+if (capaGeneros) {
+    const generos = [
+        { nombre: "CIENCIA FICCIÓN", id: 878 },
+        { nombre: "DRAMA", id: 18 },
+        { nombre: "COMEDIA", id: 35 },
+        { nombre: "ACCIÓN", id: 28 },
+        { nombre: "AVENTURA", id: 12 },
+        { nombre: "TERROR", id: 27 },
+        { nombre: "FANTASÍA", id: 14 },
+        { nombre: "ROMANCE", id: 10749 },
+        { nombre: "THRILLER", id: 53 },
+        { nombre: "ANIMACIÓN", id: 16 },
+        { nombre: "MISTERIO", id: 9648 },
+        { nombre: "DOCUMENTAL", id: 99 },
+        { nombre: "CRIMEN", id: 80 },
+        { nombre: "FAMILIAR", id: 10751 },
+        { nombre: "MUSICAL", id: 10402 },
+        { nombre: "HISTORIA", id: 36 },
+        { nombre: "BÉLICO", id: 10752 },
+        { nombre: "WESTERN", id: 37 }
+    ];
+
+    generos.forEach((genero, indice) => {
+        const palabra = document.createElement("a");
+
+        palabra.className = "genero-flotante";
+        palabra.textContent = genero.nombre;
+        palabra.href = `?genero=${genero.id}`;
+        palabra.setAttribute("aria-label", `Ver películas de ${genero.nombre}`);
+
+        palabra.style.setProperty(
+            "--posicion-x",
+            `${(indice * 37 + 8) % 90}%`
+        );
+
+        palabra.style.setProperty(
+            "--duracion",
+            `${22 + (indice % 6) * 4}s`
+        );
+
+        palabra.style.setProperty(
+            "--retraso",
+            `${-(indice * 3)}s`
+        );
+
+        capaGeneros.appendChild(palabra);
+    });
+
+    capaGeneros.addEventListener("click", (evento) => {
+        const enlace = evento.target.closest(".genero-flotante");
+
+        if (!enlace) return;
+
+        evento.preventDefault();
+
+        const idGenero = Number(
+            new URL(enlace.href).searchParams.get("genero")
+        );
+
+        const genero = generos.find(item => item.id === idGenero);
+
+        if (!genero) return;
+
+        generoSeleccionado = genero;
+        busqueda = "";
+        pelis = [];
+        pagina = 0;
+        totalPaginas = 1;
+
+        cargarPagina();
+    });
+}

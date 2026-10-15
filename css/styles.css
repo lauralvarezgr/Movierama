@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&family=Orbitron:wght@500;600;700;800&display=swap');
 
 /* ===================== BASE ===================== */
@@ -210,6 +209,7 @@ body::after {
     align-self: center;
     justify-content: center;
     padding: 3%;
+    z-index: 6;
 }
 
 .card {
@@ -411,7 +411,7 @@ mark {
 }
 
 .card:hover {
-    transform: scale(1.05);
+    transform: scale(1.10);
     z-index: 2;
 }
 
@@ -441,5 +441,80 @@ mark {
     .titulo-giro,
     body::after {
         animation: none;
+    }
+}
+
+
+
+/* ===================== GÉNEROS FLOTANTES ===================== */
+
+/* Capa de los géneros */
+#generos-flotantes {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* Las palabras flotantes */
+.genero-flotante {
+    position: absolute;
+    top: 0;
+    left: var(--posicion-x);
+
+    display: block;
+    width: max-content;
+
+    pointer-events: auto;
+    cursor: pointer;
+
+    color: rgba(180, 205, 255, 0.35);
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(15px, 1.8vw, 22px);
+    font-weight: 600;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    text-decoration: none;
+
+    text-shadow: 0 0 12px rgba(100, 150, 255, 0.12);
+
+    animation: subir-genero var(--duracion) linear var(--retraso) infinite;
+    transition: color 0.25s ease, text-shadow 0.25s ease;
+    will-change: transform;
+}
+
+/* Al pasar el ratón: detener, iluminar y poner en blanco */
+.genero-flotante:hover,
+.genero-flotante:focus-visible {
+    animation-play-state: paused;
+    color: #ffffff;
+    text-shadow:
+        0 0 6px rgba(255, 255, 255, 0.95),
+        0 0 16px rgba(255, 255, 255, 0.8),
+        0 0 30px rgba(255, 255, 255, 0.55);
+}
+
+/* Movimiento vertical */
+@keyframes subir-genero {
+    from {
+        transform: translateY(110vh);
+    }
+
+    to {
+        transform: translateY(-15vh);
+    }
+}
+
+/* Respeta las preferencias de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+    .genero-flotante {
+        animation: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .genero-flotante {
+        transition: none;
     }
 }

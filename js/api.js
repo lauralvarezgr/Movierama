@@ -39,5 +39,22 @@ export async function obtenerDetalles(id) {
     };
 }
 
+/* Obtener películas de un género concreto */
+export async function obtenerPorGenero(idGenero, pagina = 1) {
+    const { results, total_pages } = await pedirTMDB(
+        "/discover/movie",
+        {
+            with_genres: idGenero,
+            sort_by: "popularity.desc",
+            page: pagina
+        }
+    );
+
+    return {
+        pelis: results.map(json => Pelicula.desdeTMDB(json)),
+        totalPaginas: total_pages
+    };
+}
+
 
 
