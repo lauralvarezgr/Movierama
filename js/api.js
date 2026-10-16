@@ -27,17 +27,56 @@ export async function buscarPeliculas(texto, pagina = 1) {
         totalPaginas: total_pages,
     };
 }
+
 export async function obtenerDetalles(id) {
-    const [detalle, creditos] = await Promise.all([
-        pedirTMDB(`/movie/${id}`),
-        pedirTMDB(`/movie/${id}/credits`),
-    ]);
+    const [detalle, creditos, videosData, proveedoresData] =
+        await Promise.all([
+            pedirTMDB(`/movie/${id}`),
+            pedirTMDB(`/movie/${id}/credits`),
+            pedirTMDB(`/movie/${id}/videos`),
+            pedirTMDB(`/movie/${id}/watch/providers`)
+        ]);
+
+    const videos = videosData.results ?? [];
+
+    const trailer =
+        videos.find(v =>
+            v.site === "YouTube" &&
+            v.type === "Trailer" &&
+            v.official
+        ) ??
+        videos.find(v =>
+            v.site === "YouTube" &&
+            v.type === "Trailer"
+        );
+
+    const espana = proveedoresData.results?.ES;
+
     return {
         peli: Pelicula.desdeTMDB(detalle),
-        director: creditos.crew.find(p => p.job === "Director")?.name ?? "Desconocido",
-        reparto: creditos.cast.slice(0, 5).map(({ name, character}) => `${name} (${character})`),
+
+        director:
+            creditos.crew.find(p => p.job === "Director")?.name
+            ?? "Desconocido",
+
+        reparto: creditos.cast
+            .slice(0, 5)
+            .map(({ name, character }) => `${name} (${character})`),
+
+        trailerKey: trailer?.key ?? null,
+
+        streaming: {
+            enlace: espana?.link ?? null,
+            suscripcion: (espana?.flatrate ?? [])
+                .map(p => p.provider_name),
+            alquiler: (espana?.rent ?? [])
+                .map(p => p.provider_name),
+            compra: (espana?.buy ?? [])
+                .map(p => p.provider_name)
+        }
     };
 }
+
 
 /* Obtener películas de un género concreto */
 export async function obtenerPorGenero(idGenero, pagina = 1) {

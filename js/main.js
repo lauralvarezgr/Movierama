@@ -80,48 +80,141 @@ function actualizarOrbitaGeneros() {
 
 
 
-function pintarDetalle({ peli, director, reparto }) {
-    const { titulo, anio, nota, duracion, generos, descripcion, posterUrl } = peli;
+
+function pintarDetalle({ peli, director, reparto, trailerKey, streaming }) {
+    const {
+        titulo,
+        anio,
+        nota,
+        duracion,
+        generos,
+        descripcion
+    } = peli;
+
     modal.innerHTML = "";
 
     const cerrarBtn = document.createElement("button");
     cerrarBtn.className = "cerrar";
-    cerrarBtn.textContent = "X";
+    cerrarBtn.textContent = "×";
+    cerrarBtn.setAttribute("aria-label", "Cerrar ficha");
 
     const contenido = document.createElement("div");
     contenido.className = "modal-contenido";
 
-    const posterBox = document.createElement("div");
-    posterBox.className = "modal-poster";
-    if (posterUrl) {
-        const img = document.createElement("img");
-        img.src = posterUrl;
-        img.alt = `Poster de ${titulo}`;
-        posterBox.append(img);
-    }
+    // TRÁILER
+    const hero = document.createElement("div");
+    hero.className = "modal-hero";
 
-    const info = document.createElement("div");
-    info.className = "modal-info";
+
+if (trailerKey) {
+    const video = document.createElement("iframe");
+
+    video.src =
+        `https://www.youtube-nocookie.com/embed/${encodeURIComponent(trailerKey)}` +
+        `?autoplay=1&mute=1&loop=1&playlist=${encodeURIComponent(trailerKey)}` +
+        `&controls=1&playsinline=1&rel=0`;
+
+    video.title = `Tráiler de ${titulo}`;
+    video.allow = "autoplay; encrypted-media; picture-in-picture";
+    video.allowFullscreen = true;
+    video.referrerPolicy = "strict-origin-when-cross-origin";
+
+    hero.append(video);
+} else {
+    const poster = document.createElement("img");
+
+    poster.src = peli.posterUrl;
+    poster.alt = `Póster de ${titulo}`;
+    poster.className = "modal-poster-grande";
+
+    hero.append(poster);
+}
+
+
+    // DATOS SUPERPUESTOS AL VÍDEO
+    const overlay = document.createElement("div");
+    overlay.className = "modal-overlay";
 
     const h2 = document.createElement("h2");
-    h2.textContent = `${titulo} (${anio})`;
+    h2.textContent = titulo;
 
-    const entrada = document.createElement("p");
-    entrada.textContent = `Descripcion: ${descripcion}`;
+    const meta = document.createElement("p");
+    meta.className = "modal-meta";
+    meta.textContent =
+        `${anio ?? "Año desconocido"} · ${director} · ` +
+        `${nota?.toFixed(1) ?? "—"} ★ · ${duracion ?? "—"} min`;
 
-    const datos = document.createElement("p");
-    datos.textContent = `${nota.toFixed(1)} * ${duracion ?? "¿?"} min * ${generos.join(", ") || "---"}`;
+    const generosBox = document.createElement("div");
+    generosBox.className = "modal-generos";
 
-    const dir = document.createElement("p");
-    dir.textContent = `Director: ${director}`;
+    (generos ?? []).forEach(nombre => {
+        const etiqueta = document.createElement("span");
+        etiqueta.className = "modal-genero";
+        etiqueta.textContent = nombre;
+        generosBox.append(etiqueta);
+    });
 
-    const rep = document.createElement("p");
-    rep.textContent = `Reparto: ${reparto.join(", ") || "---"}`;
+    overlay.append(h2, meta, generosBox);
+    hero.append(overlay);
 
-    info.append(h2, entrada, datos, dir, rep);
-    contenido.append(posterBox, info);
+    // SINOPSIS
+    const sinopsis = document.createElement("section");
+    sinopsis.className = "modal-seccion";
+
+    const tituloSinopsis = document.createElement("h3");
+    tituloSinopsis.textContent = "Sinopsis";
+
+    const textoSinopsis = document.createElement("p");
+    textoSinopsis.textContent =
+        descripcion || "No hay sinopsis disponible.";
+
+    sinopsis.append(tituloSinopsis, textoSinopsis);
+
+    // PLATAFORMAS
+    const plataformas = document.createElement("section");
+    plataformas.className = "modal-seccion";
+
+    const tituloPlataformas = document.createElement("h3");
+    tituloPlataformas.textContent = "Dónde verla";
+
+    plataformas.append(tituloPlataformas);
+
+    const grupos = [
+        ["Suscripción", streaming?.suscripcion],
+        ["Alquiler", streaming?.alquiler],
+        ["Compra", streaming?.compra]
+    ];
+
+    let hayPlataformas = false;
+
+    grupos.forEach(([nombre, lista]) => {
+        if (!lista?.length) return;
+
+        const fila = document.createElement("p");
+        fila.className = "modal-plataformas";
+        fila.textContent = `${nombre}: ${lista.join(", ")}`;
+        plataformas.append(fila);
+        hayPlataformas = true;
+    });
+
+    if (streaming?.enlace) {
+        const enlace = document.createElement("a");
+        enlace.className = "modal-enlace";
+        enlace.href = streaming.enlace;
+        enlace.target = "_blank";
+        enlace.rel = "noopener noreferrer";
+        enlace.textContent = "Consultar opciones de streaming ↗";
+        plataformas.append(enlace);
+    } else if (!hayPlataformas) {
+        const aviso = document.createElement("p");
+        aviso.textContent = "No hay información de streaming disponible.";
+        plataformas.append(aviso);
+    }
+
+    contenido.append(hero, sinopsis, plataformas);
     modal.append(cerrarBtn, contenido);
 }
+
 
 // CARGA DE DATOS
 async function cargarPagina() {
@@ -199,6 +292,16 @@ modal.addEventListener("click", (e) => {
     // X, o clic en la zona oscura (fuera del contenido)
     if (e.target.closest(".cerrar") || e.target === modal) modal.close();
 });
+
+
+modal.addEventListener("close", () => {
+    const video = modal.querySelector(".modal-hero iframe");
+
+    if (video) {
+        video.src = "about:blank";
+    }
+});
+
 
 // TÍTULO: efecto meteorito al hacer scroll
 const RECORRIDO = 700;
